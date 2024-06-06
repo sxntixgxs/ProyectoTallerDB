@@ -29,18 +29,52 @@ FROM factura
 WHERE clienteID = 2;
 
 -- 7. Listar todas las órdenes de compra y sus detalles
-SELECT OC.ordenID AS OrdenCompra, P.nombre AS Proveedor, CONCAT(E.nombre,' ',E.apellido1) AS Empleado, PZ.nombre AS Pieza, OD.cantidad AS Cantidad, OD.precioUnit AS PrecioPieza, OC.total AS TotalCompra
-FROM
+SELECT OC.ordenID AS OrdenCompraID, P.nombre AS Proveedor, E.nombre AS Empleado, OC.total AS Total
+FROM ordenes_compra AS OC
+INNER JOIN proveedor AS P ON OC.proveedorID = P.proveedorID
+INNER JOIN empleado AS E ON OC.empleadoID = OC.empleadoID;
 
 
-8. Obtener el costo total de piezas utilizadas en una reparación específica
-9. Obtener el inventario de piezas que necesitan ser reabastecidas (cantidad
-menor que un umbral)
-10. Obtener la lista de servicios más solicitados en un período específico
-11. Obtener el costo total de reparaciones para cada cliente en un período
-específico
-12. Listar los empleados con mayor cantidad de reparaciones realizadas en un
-período específico
+
+-- 8. Obtener el costo total de piezas utilizadas en una reparación específica
+SELECT (P.precio * RP.cantidad) AS CostoTotal, RP.reparacionID AS NroReparacion
+FROM reparacion_pieza AS RP
+INNER JOIN pieza P ON RP.piezaID = P.piezaID
+WHERE RP.reparacionID = 2;
+
+
+-- 9. Obtener el inventario de piezas que necesitan ser reabastecidas (cantidad
+-- menor que un umbral)
+-- umbral = 15
+SELECT inventarioID AS NroInventario, piezaID AS Pieza, cantidad AS NroUnidades
+FROM inventario
+WHERE cantidad < 15;
+-- 10. Obtener la lista de servicios más solicitados en un período específico
+-- periodo de marzo a junio del 2022
+SELECT S.nombre AS Servicio
+
+FROM cita C 
+INNER JOIN Servicio AS S ON C.servicioID = S.servicioID
+WHERE 03 <= MONTH(C.fecha) AND 06 >= MONTH(C.fecha)
+GROUP BY C.servicioID
+;
+
+-- 11. Obtener el costo total de reparaciones para cada cliente en un período
+-- específico
+-- periodo de marzo a junio del 2022
+SELECT SUM(S.costo) AS TotalRepxCliente, CONCAT(nombre, ' ',apellido1) AS Cliente
+FROM cita C 
+INNER JOIN Servicio AS S ON C.servicioID = S.servicioID
+INNER JOIN Cliente AS CL ON C.clienteID = CL.clienteID
+WHERE 03 <= MONTH(C.fecha) AND 06 >= MONTH(C.fecha)
+GROUP BY C.clienteID; 
+-- 12. Listar los empleados con mayor cantidad de reparaciones realizadas en un
+-- período específico
+
+SELECT CONCAT(E.nombre,' ',E.apellido1) AS Empleado
+FROM reparaciones R
+INNER JOIN 
+
 13. Obtener las piezas más utilizadas en reparaciones durante un período
 específico
 14. Calcular el promedio de costo de reparaciones por vehículo

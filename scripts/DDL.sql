@@ -1,9 +1,9 @@
 -- PROYECTO MYSQL DB TALLER AUTOMOTRIZ
 -- SCRIPT DDL
 -- Dev by Santiago Sandoval Torres
-DROP SCHEMA proyectoTaller;
-CREATE SCHEMA proyectoTaller;
-USE proyectoTaller;
+DROP proyectoTallerSS;
+CREATE SCHEMA proyectoTallerSS;
+USE proyectoTallerSS;
 CREATE TABLE Cliente(
     clienteID INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(45) NOT NULL,
