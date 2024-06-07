@@ -96,19 +96,56 @@ GROUP BY RP.piezaID
 ORDER BY NroPiezasUsadas DESC LIMIT 3
 ;
 
-14. Calcular el promedio de costo de reparaciones por vehículo
+-- 14. Calcular el promedio de costo de reparaciones por vehículo
 
 SELECT ROUND(AVG(R.costoTotal),0)AS PromedioCostoReparaciones, V.placa
 FROM reparaciones R
 INNER JOIN Vehiculo V ON R.vehiculoID = V.vehiculoID
 GROUP BY R.vehiculoID;
 
-15. Obtener el inventario de piezas por proveedor
+-- 15. Obtener el inventario de piezas por proveedor
+SELECT P.nombre AS Proveedor, SUM(I.cantidad) AS NroPiezas
+FROM proveedor AS P 
+INNER JOIN pieza PZ ON P.proveedorID = PZ.proveedorID
+INNER JOIN inventario I ON PZ.piezaID = I.piezaID
+GROUP BY P.proveedorID;
+-- 16. Listar los clientes que no han realizado reparaciones en el último año
+SELECT CONCAT(C.nombre,' ',C.apellido1,' ',C.apellido2) AS Cliente
+FROM reparaciones R
+INNER JOIN Vehiculo V ON R.vehiculoID = V.vehiculoID
+INNER JOIN Cliente C ON V.clienteID = C.clienteID
+WHERE C.clienteID NOT IN(
+    SELECT C2.clienteID
+    FROM reparaciones R2 
+    INNER JOIN Vehiculo V2 ON R2.vehiculoID = V2.vehiculoID
+    INNER JOIN Cliente C2 ON V2.clienteID = C2.clienteID
+    WHERE YEAR(R2.fecha) = (
+        SELECT MAX(YEAR(R3.fecha))
+        FROM reparaciones R3
+    ))
+GROUP BY C.clienteID;
+
+-- 17. Obtener las ganancias totales del taller en un período específico
+SELECT SUM(total)
+FROM factura
+WHERE fecha LIKE '2022-04%';
+
+-- 18. Listar los empleados y el total de horas trabajadas en reparaciones en un
+-- período específico (asumiendo que se registra la duración de cada reparación)
+
+--se asume que cada reparacion dura 1hr
+SELECT CONCAT(E.nombre,' ',E.apellido1,' ',E.apellido2) AS Empleado, COUNT(R.empleadoID) AS HorasTrabajadasMarzoAJulio
+FROM reparaciones R
+INNER JOIN empleado E ON R.empleadoID = E.empleadoID
+WHERE R.fecha RLIKE '^2022-0[4-7]'
+GROUP BY R.empleadoID;
 
 
-16. Listar los clientes que no han realizado reparaciones en el último año
-17. Obtener las ganancias totales del taller en un período específico
-18. Listar los empleados y el total de horas trabajadas en reparaciones en un
-período específico (asumiendo que se registra la duración de cada reparación)
-19. Obtener el listado de servicios prestados por cada empleado en un período
-específico
+-- 19. Obtener el listado de servicios prestados por cada empleado en un período
+-- específico
+SELECT CONCAT(E.nombre,' ',E.apellido1,' ',E.apellido2) AS Empleado, S.nombre AS ServicioPrestado
+FROM reparaciones R
+INNER JOIN empleado E ON R.empleadoID = E.empleadoID
+INNER JOIN Servicio S ON R.servicioID = S.servicioID
+WHERE R.fecha RLIKE '^2022-0[4-7]'
+GROUP BY R.empleadoID, R.servicioID;

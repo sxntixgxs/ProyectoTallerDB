@@ -312,12 +312,126 @@ GROUP BY R.vehiculoID;
 ```
 15. Obtener el inventario de piezas por proveedor
 ```SQL
+SELECT P.nombre AS Proveedor, SUM(I.cantidad) AS NroPiezas
+FROM proveedor AS P 
+INNER JOIN pieza PZ ON P.proveedorID = PZ.proveedorID
+INNER JOIN inventario I ON PZ.piezaID = I.piezaID
+GROUP BY P.proveedorID;
+-- Desde la tabla proveedor hacemos dos inner join con las tablas pieza e inventario para tener los datos relacionados.
+-- Agrupamos por proveedorID para poder hacer uso de la funcion SUM que sumara todas las piezas que hayan de cada proveedor.
 ```
 ```
++---------------------------+-----------+
+| Proveedor                 | NroPiezas |
++---------------------------+-----------+
+| AutoPartes Express        |        12 |
+| Mecánica Total            |        22 |
+| Repuestos Rápidos         |         8 |
+| Carrocerías y Pinturas    |        25 |
+| Servicio de Suspensión    |        20 |
+| Frenos Seguros            |        10 |
+| Baterías y Motores        |        30 |
+| Aceites y Lubricantes     |        18 |
+| Herramientas Automotrices |        35 |
+| Electrónica Vehicular     |        40 |
++---------------------------+-----------+
+10 rows in set (0,00 sec)
 ```
 16. Listar los clientes que no han realizado reparaciones en el último año
+```SQL
+SELECT CONCAT(C.nombre,' ',C.apellido1,' ',C.apellido2) AS Cliente
+FROM reparaciones R
+INNER JOIN Vehiculo V ON R.vehiculoID = V.vehiculoID
+INNER JOIN Cliente C ON V.clienteID = C.clienteID
+WHERE C.clienteID NOT IN(
+    SELECT C2.clienteID
+    FROM reparaciones R2 
+    INNER JOIN Vehiculo V2 ON R2.vehiculoID = V2.vehiculoID
+    INNER JOIN Cliente C2 ON V2.clienteID = C2.clienteID
+    WHERE YEAR(R2.fecha) = (
+        SELECT MAX(YEAR(R3.fecha))
+        FROM reparaciones R3
+    ))
+GROUP BY C.clienteID;
+-- En esta DB el último año seria 2023 sin embargo, para obtenerlo de forma general vamos a hacer subconsultas
+-- La mas fundamental, para obtener el año mayor de todas las reparaciones, este sería el último año
+-- Con este dato, hacemos otra consulta que seria de donde obtenemos todos los clientes que hicieron reparaciones en ese año obtenido por la subconsulta anterior
+-- Finalmente, obtenemos el nombre del cliente haciendo 2 inner joins y buscamos los clientes que sean diferentes a los que aparezcan del resultado de las dos subconsultas anidadas.
+```
+```
++-------------------------+
+| Cliente                 |
++-------------------------+
+| Juan Torres Ramirez     |
+| Charlotte Perez Ramirez |
+| Mozart La Para          |
+| Pablo Sandoval Ramirez  |
++-------------------------+
+4 rows in set (0,00 sec)
+```
 17. Obtener las ganancias totales del taller en un período específico
+```SQL
+SELECT SUM(total)
+FROM factura
+WHERE fecha LIKE '2022-04%';
+-- Sumamos todas las facturas registradas en el mes de abril del 2022
+```
+```
++------------+
+| SUM(total) |
++------------+
+|    1940000 |
++------------+
+1 row in set (0,00 sec)
+```
 18. Listar los empleados y el total de horas trabajadas en reparaciones en un
 período específico (asumiendo que se registra la duración de cada reparación)
+```SQL
+SELECT CONCAT(E.nombre,' ',E.apellido1,' ',E.apellido2) AS Empleado, COUNT(R.empleadoID) AS HorasTrabajadasMarzoAJulio
+FROM reparaciones R
+INNER JOIN empleado E ON R.empleadoID = E.empleadoID
+WHERE R.fecha RLIKE '^2022-0[4-7]'
+GROUP BY R.empleadoID;
+-- Como en la base de datos no está contemplada la duración de cada reparación, asumiremos que cada reparación dura 1 hora
+-- Relacionamos las tablas de reparaciones y empleados para obtener aquellos que cumplan con la condicion
+-- Listamos todas las reparaciones de abril a junio del 2022 usando RLIKE que nos permite escribir una REGEXP. Usamos ^ para marcar que debe iniciar ahí, es decir, no puede haber nada antes, y el [4-7] para marcar la variacion de los numeros que estén dentro del rango
+-- finalmente agrupamos por empleado con e lfin de poder hacer el conteo de las horas trabajadas por cada empleado
+```
+```
++--------------------------+----------------------------+
+| Empleado                 | HorasTrabajadasMarzoAJulio |
++--------------------------+----------------------------+
+| Silvestre Diaz Maestre   |                          5 |
+| Carlos Rodríguez López   |                          1 |
+| Andrés Gómez Martínez    |                          1 |
+| Juan Pérez Hernández     |                          1 |
++--------------------------+----------------------------+
+4 rows in set (0,00 sec)
+```
 19. Obtener el listado de servicios prestados por cada empleado en un período
 específico
+```SQL
+SELECT CONCAT(E.nombre,' ',E.apellido1,' ',E.apellido2) AS Empleado, S.nombre AS ServicioPrestado
+FROM reparaciones R
+INNER JOIN empleado E ON R.empleadoID = E.empleadoID
+INNER JOIN Servicio S ON R.servicioID = S.servicioID
+WHERE R.fecha RLIKE '^2022-0[4-7]'
+GROUP BY R.empleadoID, R.servicioID;
+--Aquí hacemos 2 inner join para relacionar las tablas empleado y servicio con reparaciones
+-- Establecemos el periodo de abril a julio del 2022 usando REGEXP
+-- Agrupamos por empleado y servicio con el fin de no tener resultados duplicados sino una lista.
+```
+```
++--------------------------+-----------------------------------+
+| Empleado                 | ServicioPrestado                  |
++--------------------------+-----------------------------------+
+| Silvestre Diaz Maestre   | Cambio de Aceite                  |
+| Silvestre Diaz Maestre   | Alineación y Balanceo             |
+| Silvestre Diaz Maestre   | Cambio de Batería                 |
+| Silvestre Diaz Maestre   | Cambio de Correa de Distribución  |
+| Carlos Rodríguez López   | Alineación y Balanceo             |
+| Andrés Gómez Martínez    | Cambio de Filtro de Aire          |
+| Juan Pérez Hernández     | Revisión de Frenos                |
++--------------------------+-----------------------------------+
+7 rows in set (0,01 sec)
+```
