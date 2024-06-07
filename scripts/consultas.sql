@@ -1,4 +1,6 @@
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- Consultas requeridas
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- 1. Obtener el historial de reparaciones de un vehículo específico
 SELECT R.reparacionID AS IDReparacion, V.placa AS Placa, R.fecha AS FechaReparacion, S.nombre AS Servicio, R.costoTotal AS CostoReparacion
 FROM reparaciones AS R
@@ -149,3 +151,45 @@ INNER JOIN empleado E ON R.empleadoID = E.empleadoID
 INNER JOIN Servicio S ON R.servicioID = S.servicioID
 WHERE R.fecha RLIKE '^2022-0[4-7]'
 GROUP BY R.empleadoID, R.servicioID;
+
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- SUBCONSULTAS 
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- 1. Obtener el cliente que ha gastado más en reparaciones durante el último año.
+SELECT CONCAT(C.nombre, ' ',C.apellido1,' ',C.apellido2) AS Cliente, S.Total AS TotalReparaciones
+FROM (SELECT SUM(total) AS Total, clienteID FROM factura GROUP BY clienteID) AS S
+INNER JOIN Cliente C ON S.clienteID = C.clienteID
+GROUP BY S.clienteID
+ORDER BY S.Total DESC LIMIT 1;
+
+-- 2. Obtener la pieza más utilizada en reparaciones durante el último mes
+
+SELECT P.nombre AS Pieza, COUNT(R.piezaID) AS NroUsos
+FROM reparacion_pieza R
+INNER JOIN reparaciones R2 ON R.reparacionID = R2.reparacionID
+INNER JOIN pieza P ON R.piezaID = P.piezaID
+WHERE MONTH(R2.fecha) = (SELECT MONTH(MaxFecha)FROM(SELECT MAX(fecha)AS MaxFecha FROM reparaciones)AS Mes)
+AND 
+YEAR(R2.fecha) = (SELECT YEAR(MaxFecha)FROM(SELECT MAX(fecha)AS MaxFecha FROM reparaciones)AS Anio)
+GROUP BY R.piezaID
+ORDER BY NroUsos DESC LIMIT 1
+;
+-- 3. Obtener los proveedores que suministran las piezas más caras
+SELECT PR.proveedorID AS Proveedor, P.nombre AS Pieza, P.precio AS ValorPieza
+FROM pieza P
+INNER JOIN proveedor PR ON P.proveedorID = PR.proveedorID
+ORDER BY P.precio DESC LIMIT 3;
+-- 4. Listar las reparaciones que no utilizaron piezas específicas durante el último año
+--piezas especificas 1 y 5
+SELECT R.reparacionID AS NroReparacion, R.fecha AS FechaReparacion,R.costoTotal AS Total
+FROM reparacion_pieza RP
+INNER JOIN reparaciones R ON RP.reparacionID = R.reparacionID
+WHERE RP.piezaID <> 1 AND RP.piezaID <> 5 AND YEAR(R.fecha)=(
+    SELECT YEAR(MAX(fecha)) FROM reparaciones
+);
+-- 5. Obtener las piezas que están en inventario por debajo del 10% del stock inicial
+-- vamos a tomar el stock inicial de todas como 115
+SELECT P.nombre AS Pieza, I.cantidad AS StockActual
+FROM inventario I
+INNER JOIN pieza P ON I.piezaID = P.piezaID
+WHERE I.cantidad < (115-(115*90/100));

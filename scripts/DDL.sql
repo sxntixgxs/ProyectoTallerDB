@@ -1,7 +1,7 @@
 -- PROYECTO MYSQL DB TALLER AUTOMOTRIZ
 -- SCRIPT DDL
 -- Dev by Santiago Sandoval Torres
-DROP proyectoTallerSS;
+DROP SCHEMA proyectoTallerSS;
 CREATE SCHEMA proyectoTallerSS;
 USE proyectoTallerSS;
 CREATE TABLE Cliente(

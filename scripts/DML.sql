@@ -244,4 +244,5 @@ INSERT INTO reparacion_pieza(piezaID,reparacionID,cantidad)VALUES
 (10, 8, 1),  -- Sensor de temperatura
 -- Para la reparación del 2022-12-01
 (2, 9, 1),   -- Pastillas de freno
-(8, 9, 1);   -- Filtro de aire
+(8, 9, 1),
+(2,10,3);

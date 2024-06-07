@@ -435,3 +435,109 @@ GROUP BY R.empleadoID, R.servicioID;
 +--------------------------+-----------------------------------+
 7 rows in set (0,01 sec)
 ```
+## Subconsultas
+1. Obtener el cliente que ha gastado más en reparaciones durante el último año.
+```SQL
+SELECT CONCAT(C.nombre, ' ',C.apellido1,' ',C.apellido2) AS Cliente, S.Total AS TotalReparaciones
+FROM (SELECT SUM(total) AS Total, clienteID FROM factura GROUP BY clienteID) AS S
+INNER JOIN Cliente C ON S.clienteID = C.clienteID
+GROUP BY S.clienteID
+ORDER BY S.Total DESC LIMIT 1;
+--Hacemos una subconsulta S donde obtenemos el total de las facturas de cada cliente y su id
+-- Luego relacionamos esta subconsulta con la tabla cliente para poder acceder a los nombres de los mismos
+-- Finalmente para obtener el cliente que más gastó simplemente agrupamos por ID para tener los resultados apropiados y ordenamos por el Total de forma descendente y limitamos a 1 fila.
+```
+```
++------------------------+-------------------+
+| Cliente                | TotalReparaciones |
++------------------------+-------------------+
+| Pablo Sandoval Ramirez |           1200000 |
++------------------------+-------------------+
+1 row in set (0,00 sec)
+```
+
+2. Obtener la pieza más utilizada en reparaciones durante el último mes
+```SQL
+SELECT P.nombre AS Pieza, COUNT(R.piezaID) AS NroUsos
+FROM reparacion_pieza R
+INNER JOIN reparaciones R2 ON R.reparacionID = R2.reparacionID
+INNER JOIN pieza P ON R.piezaID = P.piezaID
+WHERE MONTH(R2.fecha) = (SELECT MONTH(MaxFecha)FROM(SELECT MAX(fecha)AS MaxFecha FROM reparaciones)AS Mes)
+AND 
+YEAR(R2.fecha) = (SELECT YEAR(MaxFecha)FROM(SELECT MAX(fecha)AS MaxFecha FROM reparaciones)AS Anio)
+GROUP BY R.piezaID
+ORDER BY NroUsos DESC LIMIT 1
+;
+-- Primero, usando inner join, relacionamos las tablas reparaciones y pieza con reparacion_pieza
+-- luego agrupamos por el id de cada pieza para poder realizar el conteo
+-- establecemos el ultimo mes sacando la fecha mayor y a esta le sacamos el mes y el año por separado con dos subconsultas
+-- finalmente ordenamos por el NrodeUsos que es el resultado del conteo y dejamos limite uno y orden descendente para obtener el resultado esperado
+```
+```
++--------------------+---------+
+| Pieza              | NroUsos |
++--------------------+---------+
+| Pastillas de freno |       1 |
++--------------------+---------+
+1 row in set (0,00 sec)
+```
+3. Obtener los proveedores que suministran las piezas más caras
+```SQL
+SELECT PR.proveedorID AS Proveedor, P.nombre AS Pieza, P.precio AS ValorPieza
+FROM pieza P
+INNER JOIN proveedor PR ON P.proveedorID = PR.proveedorID
+ORDER BY P.precio DESC LIMIT 3;
+-- Obtenemos las piezas mas caras ordenando por la columna precio de forma descendente y establecemos un limite de 3 filas
+-- Luego, relacionamos la tabla proveedor para poder acceder y mostrar el nombre de cada uno.
+```
+```
++-----------+----------------------------------+------------+
+| Proveedor | Pieza                            | ValorPieza |
++-----------+----------------------------------+------------+
+|         9 | Juego de herramientas mecánicas  |    1500000 |
+|         5 | Suspensión delantera             |    1000000 |
+|         7 | Batería de arranque              |     800000 |
++-----------+----------------------------------+------------+
+3 rows in set (0,01 sec)
+```
+
+4. Listar las reparaciones que no utilizaron piezas específicas durante el último
+año
+```SQL
+SELECT R.reparacionID AS NroReparacion, R.fecha AS FechaReparacion,R.costoTotal AS Total
+FROM reparacion_pieza RP
+INNER JOIN reparaciones R ON RP.reparacionID = R.reparacionID
+WHERE RP.piezaID <> 1 AND RP.piezaID <> 5 AND YEAR(R.fecha)=(
+    SELECT YEAR(MAX(fecha)) FROM reparaciones
+);
+-- Obtenemos primero el ultimo año mediante una subconsulta donde buscamos la fecha mayor y luego seleccionamos solo el año.
+-- En la consulta principal seleccionamos los datos relevantes de la reparacion relacionando reparacion_pieza y reparaciones
+-- Adicionamos una condicion para recibir las reparaciones donde no se hayan usado las piezas 1 y 5
+```
+```
++---------------+-----------------+--------+
+| NroReparacion | FechaReparacion | Total  |
++---------------+-----------------+--------+
+|            10 | 2023-01-01      | 100000 |
++---------------+-----------------+--------+
+1 row in set (0,01 sec)
+```
+5. Obtener las piezas que están en inventario por debajo del 10% del stock inicial
+```SQL
+SELECT P.nombre AS Pieza, I.cantidad AS StockActual
+FROM inventario I
+INNER JOIN pieza P ON I.piezaID = P.piezaID
+WHERE I.cantidad < (115-(115*90/100));
+-- Como no hay un registro de cambios en el inventario asumimos que todas las piezas tenian un stock inicial de 115 unidades
+-- Obtenemos el nombre de la pieza y su stock actual relacionando la tabla inventario y pieza
+-- Mostramos solo las piezas que están debajo del 10% de las 115 unidades iniciales
+```
+```
++------------------------+-------------+
+| Pieza                  | StockActual |
++------------------------+-------------+
+| Pastillas de freno     |          10 |
+| Correa de transmisión  |           8 |
++------------------------+-------------+
+2 rows in set (0,00 sec)
+```
