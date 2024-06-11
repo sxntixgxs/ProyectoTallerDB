@@ -565,7 +565,54 @@ CALL insertar_reparacion(320000,'2023-03-03',1,5,3);
 Query OK, 1 row affected (0,01 sec)
 ```
 2. Crear un procedimiento almacenado para actualizar el inventario de una pieza.
+```SQL
+DELIMITER $$
+CREATE PROCEDURE update_inventario(
+    IN idPieza INT,
+    IN nuevaCantidad INT
+)
+BEGIN
+    UPDATE inventario
+    SET cantidad =  nuevaCantidad
+    WHERE piezaID = idPieza;
+    SELECT 'El inventario se ha actualizado';
+END $$
+DELIMITER ;
+CALL update_inventario(4,69); 
+```
+```
++---------------------------------+
+| El inventario se ha actualizado |
++---------------------------------+
+| El inventario se ha actualizado |
++---------------------------------+
+1 row in set (0,00 sec)
+
+Query OK, 0 rows affected (0,00 sec)
+```
 3. Crear un procedimiento almacenado para eliminar una cita
+```SQL
+DELIMITER $$
+CREATE PROCEDURE eliminar_cita(
+    IN idCita INT
+)
+BEGIN 
+    DELETE FROM Cita WHERE citaID = idCita;
+    SELECT 'Eliminado con exito';
+END $$
+DELIMITER ;
+CALL eliminar_cita(13);
+```
+```
++---------------------+
+| Eliminado con exito |
++---------------------+
+| Eliminado con exito |
++---------------------+
+1 row in set (0,01 sec)
+
+Query OK, 0 rows affected (0,01 sec)
+```
 4. Crear un procedimiento almacenado para generar una factura
 5. Crear un procedimiento almacenado para obtener el historial de reparaciones
 de un vehículo
