@@ -35,18 +35,18 @@ INSERT INTO tipoVehiculo(marca,modelo) VALUES
 ('Volkswagen', 'Golf'),
 ('Audi', 'A4'),
 ('Mercedes-Benz', 'C-Class');
-INSERT INTO Vehiculo(placa,anio,clienteID,tipoVehiculoID)VALUES
-('XVW986','2014',2,1),
-('ABC123', '2018', 1, 2),
-('DEF456', '2019', 12, 3),
-('GHI789', '2020', 3, 4),
-('JKL012', '2015', 4, 5),
-('MNO345', '2016', 2, 6),
-('PQR678', '2017', 3, 7),
-('STU901', '2018', 4, 8),
-('VWX234', '2019', 12, 9),
-('YZA567', '2020', 1, 10),
-('BCD890', '2014', 3, 2);
+INSERT INTO Vehiculo(placa,anio,clienteID,tipoVehiculoID,km)VALUES
+('XVW986','2014',2,1,999),
+('ABC123', '2018', 1, 2,9119),
+('DEF456', '2019', 12, 3,499),
+('GHI789', '2020', 3, 4,9555),
+('JKL012', '2015', 4, 5,99119),
+('MNO345', '2016', 2, 6,3339),
+('PQR678', '2017', 3, 7,11119),
+('STU901', '2018', 4, 8,4449),
+('VWX234', '2019', 12, 9,44599),
+('YZA567', '2020', 1, 10,55599),
+('BCD890', '2014', 3, 2,5555);
 INSERT INTO Cita(fecha,clienteID,servicioID,vehiculoID) VALUES
 ('2022-01-04 11:00:00',2,1,1),
 ('2022-05-04 11:00:00', 2, 1, 1),

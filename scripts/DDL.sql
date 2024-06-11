@@ -30,6 +30,7 @@ CREATE TABLE Vehiculo(
     anio VARCHAR(4) NOT NULL,
     clienteID INT NOT NULL,
     tipoVehiculoID INT NOT NULL,
+    km INT,
     FOREIGN KEY (clienteID) REFERENCES Cliente(clienteID),
     FOREIGN KEY (tipoVehiculoID) REFERENCES tipoVehiculo(tipoVehiculoID)
 );
