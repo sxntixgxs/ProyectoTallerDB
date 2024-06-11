@@ -614,8 +614,56 @@ CALL eliminar_cita(13);
 Query OK, 0 rows affected (0,01 sec)
 ```
 4. Crear un procedimiento almacenado para generar una factura
+```SQL
+DELIMITER $$
+CREATE PROCEDURE generar_factura(
+    IN fechaFactura DATE,
+    IN totalFactura INT,
+    IN idCliente INT
+)
+BEGIN
+    INSERT INTO factura(fecha,total,clienteID) VALUES
+    (fechaFactura,totalFactura,idCliente);
+    SELECT 'Factura añadida con exito';
+END $$
+DELIMITER ;
+CALL generar_factura(2024-06-08,111111,3);
+```
+```
+```
++----------------------------+
+| Factura añadida con exito  |
++----------------------------+
+| Factura añadida con exito  |
++----------------------------+
+1 row in set (0,01 sec)
 5. Crear un procedimiento almacenado para obtener el historial de reparaciones
 de un vehículo
+```SQL
+DELIMITER $$
+CREATE PROCEDURE historial_reparaciones(
+    IN placa VARCHAR(6)
+)
+BEGIN 
+    SELECT V.placa AS Vehiculo, R.reparacionID, R.costoTotal, R.fecha
+    FROM Vehiculo V
+    INNER JOIN reparaciones R ON V.vehiculoID = R.vehiculoID
+    WHERE V.placa = placa;
+END $$
+DELIMITER ;
+CALL historial_reparaciones('XVW986') ;
+```
+```
++----------+--------------+------------+------------+
+| Vehiculo | reparacionID | costoTotal | fecha      |
++----------+--------------+------------+------------+
+| XVW986   |            1 |     300000 | 2022-04-01 |
+| XVW986   |           15 |     320000 | 2023-03-03 |
++----------+--------------+------------+------------+
+2 rows in set (0,00 sec)
+
+Query OK, 0 rows affected (0,00 sec)
+```
 6. Crear un procedimiento almacenado para calcular el costo total de
 reparaciones de un cliente en un período
 7. Crear un procedimiento almacenado para obtener la lista de vehículos que

@@ -56,9 +56,21 @@ BEGIN
     SELECT 'Factura añadida con exito';
 END $$
 DELIMITER ;
-CALL generar_factura(2024-06-08,111111,3);
-5. Crear un procedimiento almacenado para obtener el historial de reparaciones
-de un vehículo
+CALL generar_factura('2024-06-08',111111,3);
+--5. Crear un procedimiento almacenado para obtener el historial de reparaciones
+--de un vehículo
+DELIMITER $$
+CREATE PROCEDURE historial_reparaciones(
+    IN placa VARCHAR(6)
+)
+BEGIN 
+    SELECT V.placa AS Vehiculo, R.reparacionID, R.costoTotal, R.fecha
+    FROM Vehiculo V
+    INNER JOIN reparaciones R ON V.vehiculoID = R.vehiculoID
+    WHERE V.placa = placa;
+END $$
+DELIMITER ;
+CALL historial_reparaciones('XVW986') ;
 6. Crear un procedimiento almacenado para calcular el costo total de
 reparaciones de un cliente en un período
 7. Crear un procedimiento almacenado para obtener la lista de vehículos que
