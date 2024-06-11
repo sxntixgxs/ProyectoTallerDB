@@ -630,13 +630,14 @@ DELIMITER ;
 CALL generar_factura(2024-06-08,111111,3);
 ```
 ```
-```
+
 +----------------------------+
 | Factura añadida con exito  |
 +----------------------------+
 | Factura añadida con exito  |
 +----------------------------+
 1 row in set (0,01 sec)
+```
 5. Crear un procedimiento almacenado para obtener el historial de reparaciones
 de un vehículo
 ```SQL
@@ -654,15 +655,7 @@ DELIMITER ;
 CALL historial_reparaciones('XVW986') ;
 ```
 ```
-+----------+--------------+------------+------------+
-| Vehiculo | reparacionID | costoTotal | fecha      |
-+----------+--------------+------------+------------+
-| XVW986   |            1 |     300000 | 2022-04-01 |
-| XVW986   |           15 |     320000 | 2023-03-03 |
-+----------+--------------+------------+------------+
-2 rows in set (0,00 sec)
 
-Query OK, 0 rows affected (0,00 sec)
 ```
 6. Crear un procedimiento almacenado para calcular el costo total de
 reparaciones de un cliente en un período
